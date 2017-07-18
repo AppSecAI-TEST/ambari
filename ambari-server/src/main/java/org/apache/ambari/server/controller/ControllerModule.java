@@ -504,6 +504,7 @@ public class ControllerModule extends AbstractModule {
     install(new FactoryModuleBuilder().implement(CollectionPersisterService.class, CsvFilePersisterService.class).build(CollectionPersisterServiceFactory.class));
 
     install(new FactoryModuleBuilder().build(ConfigureClusterTaskFactory.class));
+
   }
 
   /**

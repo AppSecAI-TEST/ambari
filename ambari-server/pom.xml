@@ -1287,7 +1287,6 @@
     <dependency>
       <groupId>org.apache.directory.shared</groupId>
       <artifactId>shared-ldap</artifactId>
-      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -1686,8 +1685,12 @@
       <artifactId>jna</artifactId>
       <version>4.2.2</version>
     </dependency>
+    <dependency>
+      <groupId>org.apache.directory.api</groupId>
+      <artifactId>api-all</artifactId>
+      <version>${ldap-api.version}</version>
+    </dependency>
   </dependencies>
-
   <pluginRepositories>
     <pluginRepository>
       <id>oss.sonatype.org</id>

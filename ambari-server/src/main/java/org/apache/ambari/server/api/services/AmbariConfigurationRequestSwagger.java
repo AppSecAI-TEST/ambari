@@ -16,7 +16,6 @@ package org.apache.ambari.server.api.services;
 import java.util.Map;
 
 import org.apache.ambari.server.controller.ApiModel;
-import org.apache.ambari.server.orm.entities.ConfigurationBaseEntity;
 
 import io.swagger.annotations.ApiModelProperty;
 
