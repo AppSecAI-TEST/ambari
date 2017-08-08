@@ -56,9 +56,9 @@ import io.swagger.annotations.ApiResponses;
  *            "data": [
  *                {
  *                 "authentication.ldap.primaryUrl": "localhost:33389"
-                   "authentication.ldap.secondaryUrl": "localhost:333"
+ *                 "authentication.ldap.secondaryUrl": "localhost:333"
  *                 "authentication.ldap.baseDn": "dc=ambari,dc=apache,dc=org"
-  *                 // ......
+ *                 // ......
  *         ]
  *     }
  * </pre>

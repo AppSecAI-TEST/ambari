@@ -30,6 +30,8 @@ import org.apache.ambari.server.api.services.stackadvisor.recommendations.Recomm
 import org.apache.ambari.server.state.ChangedConfigInfo;
 import org.apache.commons.lang.StringUtils;
 
+import com.google.common.base.Preconditions;
+
 /**
  * Stack advisor request.
  */
@@ -47,6 +49,7 @@ public class StackAdvisorRequest {
   private List<ChangedConfigInfo> changedConfigurations = new LinkedList<>();
   private Set<RecommendationResponse.ConfigGroup> configGroups;
   private Map<String, String> userContext = new HashMap<>();
+  private Map<String, Object> ldapConfig = new HashMap<>();
 
   public String getStackName() {
     return stackName;
@@ -91,6 +94,8 @@ public class StackAdvisorRequest {
   public Map<String, Map<String, Map<String, String>>> getConfigurations() {
     return configurations;
   }
+
+  public Map<String, Object> getLdapConfig() { return ldapConfig; }
 
   public List<ChangedConfigInfo> getChangedConfigurations() {
     return changedConfigurations;
@@ -187,6 +192,13 @@ public class StackAdvisorRequest {
       this.instance.configGroups = configGroups;
       return this;
     }
+
+    public StackAdvisorRequestBuilder withLdapConfig(Map<String, Object> ldapConfig) {
+      Preconditions.checkNotNull(ldapConfig);
+      this.instance.ldapConfig = ldapConfig;
+      return this;
+    }
+
 
     public StackAdvisorRequest build() {
       return this.instance;
