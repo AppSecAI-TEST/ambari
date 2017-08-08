@@ -14,8 +14,11 @@
 
 package org.apache.ambari.server.ldap;
 
+import java.util.Set;
+
 import org.apache.ambari.server.AmbariException;
 import org.apache.ambari.server.ldap.service.AmbariLdapException;
+import org.apache.directory.ldap.client.api.LdapConnection;
 
 /**
  * Collection of operations for validating ldap configuration.
@@ -26,27 +29,32 @@ public interface LdapConfigurationValidatorService {
   /**
    * Tests the connection based on the provided configuration.
    *
-   * @param configuration the ambari ldap configuration instance
+   * @param ldapConnection connection instance
+   * @param configuration  the ambari ldap configuration instance
    * @throws AmbariLdapException if the connection is not possible
    */
-  void checkConnection(AmbariLdapConfiguration configuration) throws AmbariLdapException;
+  void checkConnection(LdapConnection ldapConnection, AmbariLdapConfiguration configuration) throws AmbariLdapException;
+
+
+  /**
+   * Implements LDAP user related configuration settings validation logic.
+   * Implementers communicate with the LDAP server (search, bind) to validate attributes in the provided configuration
+   * instance
+   *
+   * @param ldapConnection connection instance used to connect to the LDAP server
+   * @param testUserName   the test username
+   * @param testPassword   the test password
+   * @param configuration  the available ldap configuration
+   * @return The DN of the found user entry
+   * @throws AmbariException if the connection couldn't be estabilisheds
+   */
+  String checkUserAttributes(LdapConnection ldapConnection, String testUserName, String testPassword, AmbariLdapConfiguration configuration) throws AmbariLdapException;
 
   /**
    * Checks whether the group related LDAP attributes in the configuration are correct.
    *
-   * @param configuration the configuration instance holding the available properties
    * @throws AmbariException if the attributes are not valid
    */
-  void checkGroupAttributes(AmbariLdapConfiguration configuration) throws AmbariException;
+  Set<String> checkGroupAttributes(LdapConnection ldapConnection, String userDn, AmbariLdapConfiguration ambariLdapConfiguration) throws AmbariLdapException;
 
-  /**
-   * Tries to connect to the LDAP server with the given credentials.
-   * Primarily used for testing the user before performing other operations (eg. attribute detection)s
-   *
-   * @param username      the username
-   * @param password      the password
-   * @param configuration the available ldap configuration
-   * @throws AmbariException if the connection couldn't be estabilished
-   */
-  void checkUserAttributes(String username, String password, AmbariLdapConfiguration configuration) throws AmbariException;
 }

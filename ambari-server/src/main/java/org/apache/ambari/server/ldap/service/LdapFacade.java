@@ -16,7 +16,6 @@ package org.apache.ambari.server.ldap.service;
 
 import java.util.Map;
 
-import org.apache.ambari.server.AmbariException;
 import org.apache.ambari.server.ldap.AmbariLdapConfiguration;
 
 /**
@@ -29,9 +28,9 @@ public interface LdapFacade {
    * Tests the connection to the LDAP server based on the provided configuration.
    *
    * @param ambariLdapConfiguration the available ldap related configuration
-   * @throws AmbariException if the connection fails or other problems occur during the operation
+   * @throws AmbariLdapException if the connection fails or other problems occur during the operation
    */
-  void checkConnection(AmbariLdapConfiguration ambariLdapConfiguration) throws AmbariException;
+  void checkConnection(AmbariLdapConfiguration ambariLdapConfiguration) throws AmbariLdapException;
 
 
   /**
@@ -46,7 +45,7 @@ public interface LdapFacade {
    *
    * @param parameters              a map of property name and value pairs holding information to facilitate checking the attributes
    * @param ambariLdapConfiguration configutration instance with available attributes
-   * @throws AmbariException if the attribute checking fails
+   * @throws AmbariLdapException if the attribute checking fails
    */
-  void checkLdapAttibutes(Map<String, Object> parameters, AmbariLdapConfiguration ambariLdapConfiguration) throws AmbariException;
+  void checkLdapAttibutes(Map<String, Object> parameters, AmbariLdapConfiguration ambariLdapConfiguration) throws AmbariLdapException;
 }

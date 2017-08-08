@@ -53,7 +53,7 @@ public class AmbariLdapConfiguration {
     GROUP_OBJECT_CLASS("ambari.ldap.group.object.class"),
     GROUP_NAME_ATTRIBUTE("ambari.ldap.group.name.attribute"),
     GROUP_MEMBER_ATTRIBUTE("ambari.ldap.group.member.attribute"),
-    GROUP_SEARCH_BASE("ambari.ldap.group.member.attribute"),
+    GROUP_SEARCH_BASE("ambari.ldap.group.search.base"),
     DN_ATTRIBUTE("authentication.ldap.dnAttribute");
 
     private String propertyName;
@@ -124,6 +124,26 @@ public class AmbariLdapConfiguration {
 
   public String userNameAttribute() {
     return (String) configurationValue(LdapConfigProperty.USER_NAME_ATTRIBUTE);
+  }
+
+  public String userSearchBase() {
+    return (String) configurationValue(LdapConfigProperty.USER_SEARCH_BASE);
+  }
+
+  public String groupObjectClass() {
+    return (String) configurationValue(LdapConfigProperty.GROUP_OBJECT_CLASS);
+  }
+
+  public String groupNameAttribute() {
+    return (String) configurationValue(LdapConfigProperty.GROUP_NAME_ATTRIBUTE);
+  }
+
+  public String groupMemberAttribute() {
+    return (String) configurationValue(LdapConfigProperty.GROUP_MEMBER_ATTRIBUTE);
+  }
+
+  public String groupSearchBase() {
+    return (String) configurationValue(LdapConfigProperty.GROUP_SEARCH_BASE);
   }
 
 }

@@ -16,13 +16,14 @@
 package org.apache.ambari.server.ldap.service;
 
 import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.apache.ambari.server.AmbariException;
 import org.apache.ambari.server.ldap.AmbariLdapConfiguration;
 import org.apache.ambari.server.ldap.LdapConfigurationValidatorService;
+import org.apache.directory.ldap.client.api.LdapConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,17 +52,21 @@ public class AmbariLdapFacade implements LdapFacade {
   private LdapConfigurationValidatorService ldapConfigurationValidatorService;
 
   @Inject
+  private LdapConnectionService ldapConnectionService;
+
+  @Inject
   public AmbariLdapFacade() {
   }
 
   @Override
-  public void checkConnection(AmbariLdapConfiguration ambariLdapConfiguration) throws AmbariException {
+  public void checkConnection(AmbariLdapConfiguration ambariLdapConfiguration) throws AmbariLdapException {
     try {
       LOGGER.info("Validating LDAP connection related configuration based on: {}", ambariLdapConfiguration);
-      ldapConfigurationValidatorService.checkConnection(ambariLdapConfiguration);
+      LdapConnection connection = ldapConnectionService.createLdapConnection(ambariLdapConfiguration);
+      ldapConfigurationValidatorService.checkConnection(connection, ambariLdapConfiguration);
     } catch (AmbariLdapException e) {
       LOGGER.error("Validating LDAP connection configuration failed", e);
-      throw new AmbariException("Validating LDAP connection configuration failed", e);
+      throw e;
     }
     LOGGER.info("Validating LDAP connection related configuration: SUCCESS");
   }
@@ -74,7 +79,7 @@ public class AmbariLdapFacade implements LdapFacade {
   }
 
   @Override
-  public void checkLdapAttibutes(Map<String, Object> parameters, AmbariLdapConfiguration ldapConfiguration) throws AmbariException {
+  public void checkLdapAttibutes(Map<String, Object> parameters, AmbariLdapConfiguration ldapConfiguration) throws AmbariLdapException {
     String userName = getTestUserNameFromParameters(parameters);
     String testUserPass = getTestUserPasswordFromParameters(parameters);
 
@@ -82,8 +87,14 @@ public class AmbariLdapFacade implements LdapFacade {
       throw new IllegalArgumentException("No test user available for testing LDAP attributes");
     }
 
-    LOGGER.info("Testing LDAP attributes with test user: {}", userName);
-    ldapConfigurationValidatorService.checkUserAttributes(userName, testUserPass, ldapConfiguration);
+    LdapConnection ldapConnection = ldapConnectionService.createLdapConnection(ldapConfiguration);
+
+    LOGGER.info("Testing LDAP user attributes with test user: {}", userName);
+    String userDn = ldapConfigurationValidatorService.checkUserAttributes(ldapConnection, userName, testUserPass, ldapConfiguration);
+
+    LOGGER.info("Testing LDAP group attributes with test user dn: {}", userDn);
+    Set<String> groups = ldapConfigurationValidatorService.checkGroupAttributes(ldapConnection, userDn, ldapConfiguration);
+
   }
 
 
