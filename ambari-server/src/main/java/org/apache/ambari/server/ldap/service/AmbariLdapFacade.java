@@ -79,7 +79,7 @@ public class AmbariLdapFacade implements LdapFacade {
   }
 
   @Override
-  public void checkLdapAttibutes(Map<String, Object> parameters, AmbariLdapConfiguration ldapConfiguration) throws AmbariLdapException {
+  public Set<String> checkLdapAttibutes(Map<String, Object> parameters, AmbariLdapConfiguration ldapConfiguration) throws AmbariLdapException {
     String userName = getTestUserNameFromParameters(parameters);
     String testUserPass = getTestUserPasswordFromParameters(parameters);
 
@@ -95,6 +95,7 @@ public class AmbariLdapFacade implements LdapFacade {
     LOGGER.info("Testing LDAP group attributes with test user dn: {}", userDn);
     Set<String> groups = ldapConfigurationValidatorService.checkGroupAttributes(ldapConnection, userDn, ldapConfiguration);
 
+    return groups;
   }
 
 

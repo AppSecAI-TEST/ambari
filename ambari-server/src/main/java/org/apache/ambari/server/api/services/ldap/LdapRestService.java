@@ -28,6 +28,8 @@
 
 package org.apache.ambari.server.api.services.ldap;
 
+import java.util.Set;
+
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -41,11 +43,15 @@ import org.apache.ambari.server.api.services.BaseService;
 import org.apache.ambari.server.api.services.Result;
 import org.apache.ambari.server.api.services.ResultImpl;
 import org.apache.ambari.server.api.services.ResultStatus;
+import org.apache.ambari.server.controller.internal.ResourceImpl;
+import org.apache.ambari.server.controller.spi.Resource;
 import org.apache.ambari.server.ldap.AmbariLdapConfiguration;
 import org.apache.ambari.server.ldap.LdapConfigurationFactory;
 import org.apache.ambari.server.ldap.service.LdapFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.Sets;
 
 /**
  * Endpoint designated to LDAP specific operations.
@@ -68,6 +74,8 @@ public class LdapRestService extends BaseService {
   @Consumes(MediaType.APPLICATION_JSON)
   public Response validateConfiguration(LdapCheckConfigurationRequest ldapCheckConfigurationRequest) {
 
+    Set<String> groups = Sets.newHashSet();
+
     Result result = new ResultImpl(new ResultStatus(ResultStatus.STATUS.OK));
     try {
 
@@ -86,7 +94,11 @@ public class LdapRestService extends BaseService {
         case "test-attributes":
 
           LOGGER.info("Testing LDAP attributes ....");
-          ldapFacade.checkLdapAttibutes(ldapCheckConfigurationRequest.getRequestInfo().getParameters(), ambariLdapConfiguration);
+          groups = ldapFacade.checkLdapAttibutes(ldapCheckConfigurationRequest.getRequestInfo().getParameters(), ambariLdapConfiguration);
+          // todo factor out the resource creation, design better the structure in the response
+          Resource resource = new ResourceImpl(Resource.Type.AmbariConfiguration);
+          resource.setProperty("groups", groups);
+          result.getResultTree().addChild(resource, "payload");
 
           break;
         case "detect-attributes":
@@ -101,7 +113,7 @@ public class LdapRestService extends BaseService {
       }
 
     } catch (Exception e) {
-      result = new ResultImpl(new ResultStatus(ResultStatus.STATUS.BAD_REQUEST, e));
+      result.setResultStatus(new ResultStatus(ResultStatus.STATUS.BAD_REQUEST, e));
     }
 
     return Response.status(result.getStatus().getStatusCode()).entity(getResultSerializer().serialize(result)).build();

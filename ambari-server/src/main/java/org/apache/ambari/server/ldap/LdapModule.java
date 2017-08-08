@@ -16,8 +16,10 @@
 package org.apache.ambari.server.ldap;
 
 import org.apache.ambari.server.ldap.service.AmbariLdapFacade;
+import org.apache.ambari.server.ldap.service.LdapConnectionService;
 import org.apache.ambari.server.ldap.service.LdapFacade;
 import org.apache.ambari.server.ldap.service.ad.DefaultLdapConfigurationValidatorService;
+import org.apache.ambari.server.ldap.service.ad.DefaultLdapConnectionService;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
@@ -31,6 +33,7 @@ public class LdapModule extends AbstractModule {
   protected void configure() {
     bind(LdapFacade.class).to(AmbariLdapFacade.class);
     bind(LdapConfigurationValidatorService.class).to(DefaultLdapConfigurationValidatorService.class);
+    bind(LdapConnectionService.class).to(DefaultLdapConnectionService.class);
 
     install(new FactoryModuleBuilder().build(LdapConfigurationFactory.class));
   }

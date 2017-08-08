@@ -56,7 +56,7 @@ public class DefaultLdapConnectionService implements LdapConnectionService {
     ldapConnectionConfig.setLdapPort(ambariAmbariLdapConfiguration.ldapServerPort());
     ldapConnectionConfig.setUseSsl(ambariAmbariLdapConfiguration.useSSL());
 
-    //todo set the other values as required
+    // todo set the other values as required
     return ldapConnectionConfig;
   }
 

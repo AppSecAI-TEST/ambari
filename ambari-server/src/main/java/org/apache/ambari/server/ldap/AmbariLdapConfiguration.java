@@ -48,7 +48,7 @@ public class AmbariLdapConfiguration {
     MANAGER_PASSWORD("ambari.ldap.managerpassword"),
     USER_OBJECT_CLASS("ambari.ldap.user.object.class"),
     USER_NAME_ATTRIBUTE("ambari.ldap.user.name.attribute"),
-    USER_SEARCH_BASE("ambari.ldap.user.search.Base"),
+    USER_SEARCH_BASE("ambari.ldap.user.search.base"),
 
     GROUP_OBJECT_CLASS("ambari.ldap.group.object.class"),
     GROUP_NAME_ATTRIBUTE("ambari.ldap.group.name.attribute"),

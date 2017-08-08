@@ -15,6 +15,7 @@
 package org.apache.ambari.server.ldap.service;
 
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.ambari.server.ldap.AmbariLdapConfiguration;
 
@@ -47,5 +48,5 @@ public interface LdapFacade {
    * @param ambariLdapConfiguration configutration instance with available attributes
    * @throws AmbariLdapException if the attribute checking fails
    */
-  void checkLdapAttibutes(Map<String, Object> parameters, AmbariLdapConfiguration ambariLdapConfiguration) throws AmbariLdapException;
+  Set<String> checkLdapAttibutes(Map<String, Object> parameters, AmbariLdapConfiguration ambariLdapConfiguration) throws AmbariLdapException;
 }

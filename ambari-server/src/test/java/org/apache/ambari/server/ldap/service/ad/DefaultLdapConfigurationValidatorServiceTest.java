@@ -18,23 +18,15 @@ import static org.junit.Assert.assertNotNull;
 
 import java.util.Map;
 
-import org.apache.ambari.server.AmbariException;
 import org.apache.ambari.server.ldap.AmbariLdapConfiguration;
 import org.apache.ambari.server.ldap.LdapConfigurationValidatorService;
 import org.apache.ambari.server.ldap.service.LdapConnectionService;
 import org.apache.directory.api.ldap.model.cursor.EntryCursor;
-import org.apache.directory.api.ldap.model.cursor.SearchCursor;
 import org.apache.directory.api.ldap.model.entry.Entry;
-import org.apache.directory.api.ldap.model.message.Response;
-import org.apache.directory.api.ldap.model.message.SearchRequest;
-import org.apache.directory.api.ldap.model.message.SearchRequestImpl;
-import org.apache.directory.api.ldap.model.message.SearchResultEntry;
 import org.apache.directory.api.ldap.model.message.SearchScope;
-import org.apache.directory.api.ldap.model.name.Dn;
 import org.apache.directory.ldap.client.api.LdapConnection;
 import org.apache.directory.ldap.client.api.LdapConnectionConfig;
 import org.apache.directory.ldap.client.api.LdapNetworkConnection;
-import org.apache.directory.ldap.client.api.search.FilterBuilder;
 import org.apache.directory.shared.ldap.constants.SchemaConstants;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -75,57 +67,24 @@ public class DefaultLdapConfigurationValidatorServiceTest {
 
   @Test
   public void testCheckUserAttributes() throws Exception {
+    // GIVEN
     Map<String, Object> ldapPropsMap = Maps.newHashMap();
 
-    ldapPropsMap.put(AmbariLdapConfiguration.LdapConfigProperty.BIND_ANONIMOUSLY.propertyName(), false);
+    ldapPropsMap.put(AmbariLdapConfiguration.LdapConfigProperty.BIND_ANONIMOUSLY.propertyName(), "true");
     ldapPropsMap.put(AmbariLdapConfiguration.LdapConfigProperty.LDAP_SERVER_HOST.propertyName(), "ldap.forumsys.com");
     ldapPropsMap.put(AmbariLdapConfiguration.LdapConfigProperty.LDAP_SERVER_PORT.propertyName(), "389");
     ldapPropsMap.put(AmbariLdapConfiguration.LdapConfigProperty.BASE_DN.propertyName(), "dc=example,dc=com");
+
     ldapPropsMap.put(AmbariLdapConfiguration.LdapConfigProperty.USER_OBJECT_CLASS.propertyName(), SchemaConstants.PERSON_OC);
-    ldapPropsMap.put(AmbariLdapConfiguration.LdapConfigProperty.GROUP_OBJECT_CLASS.propertyName(), SchemaConstants.GROUP_OF_UNIQUE_NAMES_OC);
-    ldapPropsMap.put(AmbariLdapConfiguration.LdapConfigProperty.GROUP_NAME_ATTRIBUTE.propertyName(), SchemaConstants.CN_AT);
-    ldapPropsMap.put(AmbariLdapConfiguration.LdapConfigProperty.GROUP_MEMBER_ATTRIBUTE.propertyName(), SchemaConstants.UNIQUE_MEMBER_AT);
     ldapPropsMap.put(AmbariLdapConfiguration.LdapConfigProperty.USER_NAME_ATTRIBUTE.propertyName(), SchemaConstants.UID_AT);
+    ldapPropsMap.put(AmbariLdapConfiguration.LdapConfigProperty.USER_SEARCH_BASE.propertyName(), "dc=example,dc=com");
+
 
     AmbariLdapConfiguration ambariLdapConfiguration = new AmbariLdapConfiguration(ldapPropsMap);
+    LdapConnectionService connectionService = new DefaultLdapConnectionService();
+    LdapNetworkConnection ldapConnection = connectionService.createLdapConnection(ambariLdapConfiguration);
 
-
-    try {
-      LOGGER.info("Authenticating user {} against the LDAP server ...", TEST_USER);
-      LdapConnectionService connectionService = new DefaultLdapConnectionService();
-      LdapNetworkConnection connection = connectionService.createLdapConnection(ambariLdapConfiguration);
-
-      String filter = FilterBuilder.and(
-        FilterBuilder.equal(SchemaConstants.OBJECT_CLASS_AT, ambariLdapConfiguration.userObjectClass()),
-        FilterBuilder.equal(ambariLdapConfiguration.userNameAttribute(), TEST_USER))
-        .toString();
-
-      SearchRequest searchRequest = new SearchRequestImpl();
-      searchRequest.setBase(new Dn(ambariLdapConfiguration.baseDn()));
-      searchRequest.setFilter(filter);
-      searchRequest.setScope(SearchScope.SUBTREE);
-
-      LOGGER.info("loking up user: {} based on the filtr: {}", TEST_USER, filter);
-
-      connection.bind();
-      SearchCursor searchCursor = connection.search(searchRequest);
-
-      while (searchCursor.next()) {
-        Response response = searchCursor.get();
-
-        // process the SearchResultEntry
-        if (response instanceof SearchResultEntry) {
-          Entry resultEntry = ((SearchResultEntry) response).getEntry();
-          System.out.println(resultEntry);
-        }
-      }
-
-      searchCursor.close();
-
-    } catch (Exception e) {
-      throw new AmbariException("Error during user authentication check", e);
-    }
-
+    ldapConfigurationValidatorService.checkUserAttributes(ldapConnection, "einstein", "", ambariLdapConfiguration);
   }
 
   @Test
@@ -138,8 +97,6 @@ public class DefaultLdapConfigurationValidatorServiceTest {
     ldapPropsMap.put(AmbariLdapConfiguration.LdapConfigProperty.LDAP_SERVER_PORT.propertyName(), "389");
     ldapPropsMap.put(AmbariLdapConfiguration.LdapConfigProperty.BASE_DN.propertyName(), "dc=example,dc=com");
 
-    ldapPropsMap.put(AmbariLdapConfiguration.LdapConfigProperty.USER_OBJECT_CLASS.propertyName(), SchemaConstants.PERSON_OC);
-    ldapPropsMap.put(AmbariLdapConfiguration.LdapConfigProperty.USER_NAME_ATTRIBUTE.propertyName(), SchemaConstants.UID_AT);
 
     ldapPropsMap.put(AmbariLdapConfiguration.LdapConfigProperty.GROUP_OBJECT_CLASS.propertyName(), SchemaConstants.GROUP_OF_UNIQUE_NAMES_OC);
     ldapPropsMap.put(AmbariLdapConfiguration.LdapConfigProperty.GROUP_NAME_ATTRIBUTE.propertyName(), SchemaConstants.CN_AT);

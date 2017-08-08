@@ -37,7 +37,6 @@ import org.apache.directory.api.ldap.model.message.SearchRequestImpl;
 import org.apache.directory.api.ldap.model.message.SearchScope;
 import org.apache.directory.api.ldap.model.name.Dn;
 import org.apache.directory.ldap.client.api.LdapConnection;
-import org.apache.directory.ldap.client.api.LdapNetworkConnection;
 import org.apache.directory.ldap.client.api.search.FilterBuilder;
 import org.apache.directory.shared.ldap.constants.SchemaConstants;
 import org.slf4j.Logger;
@@ -84,18 +83,18 @@ public class DefaultLdapConfigurationValidatorService implements LdapConfigurati
    * @param testUserName            the test username
    * @param testPassword            the test password
    * @param ambariLdapConfiguration configuration instance holding ldap configuration details
+   * @return the DN of the test user
    * @throws AmbariException if the attributes are not valid or any errors occurs
    */
   @Override
   public String checkUserAttributes(LdapConnection ldapConnection, String testUserName, String testPassword, AmbariLdapConfiguration ambariLdapConfiguration) throws AmbariLdapException {
-    LdapNetworkConnection connection = null;
     SearchCursor searchCursor = null;
     String userDn = null;
     try {
       LOGGER.info("Checking user attributes for user {} r ...", testUserName);
 
       // bind anonimously or with manager data
-      bind(ambariLdapConfiguration, connection);
+      bind(ambariLdapConfiguration, ldapConnection);
 
       // set up a filter based on the provided attributes
       String filter = FilterBuilder.and(
@@ -104,7 +103,7 @@ public class DefaultLdapConfigurationValidatorService implements LdapConfigurati
         .toString();
 
       LOGGER.info("Searching for the user: {} using the search filter: {}", testUserName, filter);
-      EntryCursor entryCursor = connection.search(new Dn(ambariLdapConfiguration.userSearchBase()), filter, SearchScope.SUBTREE);
+      EntryCursor entryCursor = ldapConnection.search(new Dn(ambariLdapConfiguration.userSearchBase()), filter, SearchScope.SUBTREE);
 
       // collecting search result entries
       List<Entry> users = Lists.newArrayList();
@@ -128,7 +127,7 @@ public class DefaultLdapConfigurationValidatorService implements LdapConfigurati
       throw new AmbariLdapException(e.getMessage(), e);
 
     } finally {
-      closeResources(connection, searchCursor);
+      closeResources(ldapConnection, searchCursor);
     }
     return userDn;
   }
@@ -172,14 +171,19 @@ public class DefaultLdapConfigurationValidatorService implements LdapConfigurati
       throw new AmbariLdapException(e.getMessage(), e);
 
     } finally {
-
       closeResources(ldapConnection, searchCursor);
-
     }
 
     return processGroupResults(groupResponses, ambariLdapConfiguration);
   }
 
+  /**
+   * Binds to the LDAP server (anonimously or wit manager credentials)
+   *
+   * @param ambariLdapConfiguration configuration instance
+   * @param connection              connection instance
+   * @throws LdapException if the bind operation fails
+   */
   private void bind(AmbariLdapConfiguration ambariLdapConfiguration, LdapConnection connection) throws LdapException {
     LOGGER.info("Connecting to LDAP ....");
     if (!ambariLdapConfiguration.bindAnonimously()) {
@@ -198,6 +202,13 @@ public class DefaultLdapConfigurationValidatorService implements LdapConfigurati
   }
 
 
+  /**
+   * Extracts meaningful values from the search result.
+   *
+   * @param groupResponses          the result entries returned by the search
+   * @param ambariLdapConfiguration holds the keys of the meaningful attributes
+   * @return a set with the group names the test user belongs to
+   */
   private Set<String> processGroupResults(Set<Response> groupResponses, AmbariLdapConfiguration ambariLdapConfiguration) {
     Set<String> groupStrSet = Sets.newHashSet();
     for (Response response : groupResponses) {
